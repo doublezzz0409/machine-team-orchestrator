@@ -1,0 +1,231 @@
+flowchart TD
+    U[👤 总指挥<br/>提交任务]
+    U --> M[👑 总调度层<br/>意图识别与任务分类]
+
+    M -- 可匹配 --> ROUTE[📋 TASK_ROUTE<br/>输出目标组 + 路由理由]
+    M -- 无法匹配 --> UNKNOWN[❓ UNKNOWN_TASK<br/>列出六组能力范围<br/>等待总指挥指令]
+
+    ROUTE --> CONFIRM{总指挥确认?}
+    CONFIRM -- 确认 --> DISPATCH[📤 TASK_DISPATCH<br/>派发至目标组]
+    CONFIRM -- 改派 --> M
+
+    DISPATCH --> DEFECT{目标组 = DEFECT?}
+    DISPATCH --> FEATURE{目标组 = FEATURE?}
+    DISPATCH --> DEBT{目标组 = DEBT?}
+    DISPATCH --> RESEARCH{目标组 = RESEARCH?}
+    DISPATCH --> RISK{目标组 = RISK?}
+
+    DEFECT -- 是 --> D_SUB[🐛 缺陷修复组]
+    FEATURE -- 是 --> F_SUB[🚀 功能开发组]
+    DEBT -- 是 --> B_SUB[🔧 技术债务清理组]
+    RESEARCH -- 是 --> R_SUB[🔬 技术调研组]
+    RISK -- 是 --> K_SUB[🛡️ 风险缓解组]
+
+    %% ===== 缺陷修复组 =====
+    subgraph D_SUB[🐛 缺陷修复组]
+        D1[👑 主控<br/>严重度判定] -- 非紧急 --> D_STD[标准通道]
+        D1 -- 紧急P0 --> D_EMR[紧急通道]
+
+        subgraph D_STD[标准通道]
+            D2[👨‍💻 程序员<br/>根因分析+修复方案+测试草案]
+            D2 --> D3A[🔍 审计A<br/>安全与边界]
+            D2 --> D3B[🔍 审计B<br/>性能与架构]
+            D3A --> D4[🧹 主控信号过滤<br/>对立/互补/冗余/越界]
+            D3B --> D4
+            D4 --> D5[💬 交叉讨论<br/>脱敏中继+强制质疑]
+            D5 --> D6[📄 最终审计报告<br/>共识+未解决分歧]
+            D6 --> D7[👨‍💻 程序员执行修复<br/>逐条回应+独立判断]
+            D7 --> D8[🧪 QA验证]
+            D8 -- 完全通过 --> D_CLOSE[🎯 关闭]
+            D8 -- 通过但有观察 --> D9[👑 主控评估观察]
+            D8 -- 未通过 --> D7
+            D9 -- 触发补充讨论 --> D5
+            D9 -- 不触发 --> D_CLOSE
+        end
+
+        subgraph D_EMR[紧急通道]
+            E1[👨‍💻 程序员Fast<br/>止血+自测]
+            E1 --> E2[🔍 审计A<br/>快速安全扫描]
+            E2 --> E3[🧪 QA验证]
+            E3 -- 未通过 --> E1
+            E3 -- 通过 --> E_CLOSE[🎯 关闭<br/>标注紧急通道]
+        end
+    end
+
+    %% ===== 功能开发组 =====
+    subgraph F_SUB[🚀 功能开发组]
+        F1[📋 产品经理<br/>需求文档<br/>用户故事+验收条件+优先级+非目标]
+        F1 --> F2[🏗️ 架构师<br/>技术方案+约束+债务评估]
+        F2 -- 方案可行 --> F3[👨‍💻 工程师<br/>需求澄清+方案理解]
+        F2 -- 复杂度不可接受 --> F_DISCUSS[💬 PM与架构师讨论]
+        F_DISCUSS -- 达成一致 --> F2
+        F_DISCUSS -- 无法一致 --> F_ESCALATE[📤 呈报总指挥]
+        F3 -- 需求矛盾 --> F_CLARIFY[📤 打回PM澄清]
+        F_CLARIFY --> F1
+        F3 --> F4[👨‍💻 工程师实现<br/>自测报告+文档变更标注]
+        F4 --> F5[🧪 QA<br/>前置审查验收条件]
+        F5 -- 条件有漏洞 --> F_REVISE[📤 打回PM修订]
+        F_REVISE --> F1
+        F5 -- 条件可测 --> F6[🧪 QA执行测试]
+        F6 -- 未通过 --> F_FIX[📤 打回工程师]
+        F_FIX --> F4
+        F6 -- 通过但有观察 --> F7[👑 主控评估观察]
+        F6 -- 完全通过 --> F8[📋 PM最终验收]
+        F7 -- 触发讨论 --> F4
+        F7 -- 不触发 --> F8
+        F8 -- 通过 --> F_DOC{技术作家启用?}
+        F8 -- 不通过 --> F_FIX
+        F_DOC -- 是 --> F9[📝 技术作家<br/>撰写/更新文档]
+        F_DOC -- 否 --> F_CLOSE[🎯 交付完成]
+        F9 -- 发现API模糊 --> F_QUERY[📤 打回工程师/架构师]
+        F_QUERY --> F4
+        F9 -- 文档完成 --> F_CLOSE
+    end
+
+    %% ===== 技术债务清理组 =====
+    subgraph B_SUB[🔧 技术债务清理组]
+        B1[👑 主控<br/>确定清理范围边界]
+        B1 --> B2[🔍 债务审计师<br/>识别债务+清理方案+行为红线]
+        B2 --> B3[👨‍💻 重构工程师<br/>评估可行性]
+        B3 -- 方案可行 --> B4[👨‍💻 重构工程师执行<br/>变更摘要+行为不变声明]
+        B3 -- 方案有风险 --> B_DISCUSS[💬 工程师质疑→审计师回应]
+        B_DISCUSS -- 达成一致 --> B_REVISE[📤 审计师修订方案]
+        B_REVISE --> B3
+        B_DISCUSS -- 无法一致 --> B_ESCALATE[📤 呈报总指挥]
+        B4 -- 发现计划外高风险 --> B_PAUSE[🚨 工程师暂停声明风险]
+        B_PAUSE --> B_EVAL[👑 主控评估风险]
+        B_EVAL -- 风险可控 --> B4
+        B_EVAL -- 风险过高 --> B_ESCALATE
+        B4 -- 执行顺利 --> B5[🧪 回归QA<br/>行为不变+债务清除验证]
+        B5 -- 完全通过 --> B_CLOSE[🎯 清理完成]
+        B5 -- 否决：行为退化 --> B_FIX[📤 打回工程师]
+        B_FIX --> B4
+        B5 -- 通过但有保留 --> B6[👑 主控评估保留意见]
+        B6 -- 需补充清理 --> B2
+        B6 -- 接受现状 --> B_CLOSE
+    end
+
+    %% ===== 技术调研与原型验证组 =====
+    subgraph R_SUB[🔬 技术调研组]
+        R1[👑 主控<br/>审核调研申请+分配时间盒]
+        R1 --> R2[🔬 调研工程师<br/>实验设计+原型搭建+数据收集]
+        R2 --> R3[📊 产出调研数据<br/>实验报告+原型代码+初步结论]
+        R3 --> R4[⚖️ 技术评估师<br/>独立审核方法与数据]
+        R4 -- 方法有漏洞 --> R_REJECT[📤 打回调研工程师<br/>附具体理由]
+        R_REJECT --> R2
+        R4 -- 审核通过 --> R5[📋 最终建议<br/>可行/不可行/有条件可行<br/>风险量化+替代方案]
+        R5 --> R6[👤 客户接收结论]
+        R6 -- 接受 --> R_CLOSE[🎯 应用于方案设计]
+        R6 -- 不认同 --> R_ESCALATE[📤 呈报总指挥裁决]
+        R2 -- 时间盒到期 --> R_FORCED[⏰ 强制提交<br/>当前数据+未验证项]
+        R_FORCED --> R3
+    end
+
+    %% ===== 风险缓解与安全加固组 =====
+    subgraph K_SUB[🛡️ 风险缓解组]
+        K1[👑 主控<br/>设定范围与时间盒]
+        K1 --> K2[🔍 安全审计师<br/>风险识别+分级+加固方向]
+        K2 --> K3[🛡️ 加固工程师<br/>评估可行性]
+        K3 -- 方案可行 --> K4[🛡️ 加固工程师执行<br/>变更摘要+加固声明]
+        K3 -- 方案有风险 --> K_DISCUSS[💬 工程师质疑→审计师回应]
+        K_DISCUSS -- 达成一致 --> K_REVISE[📋 审计师修订方案]
+        K_REVISE --> K3
+        K_DISCUSS -- 无法一致 --> K_ESCALATE[📤 呈报总指挥]
+        K4 -- 发现计划外高风险 --> K_PAUSE[🚨 工程师暂停声明风险]
+        K_PAUSE --> K_EVAL[👑 主控评估风险]
+        K_EVAL -- 风险可控 --> K4
+        K_EVAL -- 风险过高 --> K_ESCALATE
+        K4 -- 执行顺利 --> K5[🧪 风险验证QA<br/>功能回归+性能基线+攻击模拟]
+        K5 -- 完全通过 --> K_CLOSE[🎯 风险已缓解]
+        K5 -- 否决 --> K_FAIL[📤 附证据打回]
+        K_FAIL -- 加固无效 --> K4
+        K_FAIL -- 方向根本性缺陷 --> K2
+        K5 -- 通过但有残余风险 --> K6[👑 主控评估残余风险]
+        K6 -- 可接受 --> K_RESIDUAL[📋 残余风险归档<br/>设定复评期限]
+        K6 -- 不可接受 --> K2
+        K_RESIDUAL --> K_CLOSE
+    end
+
+    %% ===== 组关闭后的信号检测 =====
+    D_CLOSE --> SIG{总调度层<br/>检测跨组信号}
+    F_CLOSE --> SIG
+    B_CLOSE --> SIG
+    R_CLOSE --> SIG
+    K_CLOSE --> SIG
+
+    SIG -- TECH_DEBT_FOUND --> HANDOFF_D[📤 CROSS_GROUP_HANDOFF<br/>转交技术债务清理组]
+    SIG -- SECURITY_RISK_FOUND --> HANDOFF_K[📤 CROSS_GROUP_HANDOFF<br/>转交风险缓解组]
+    SIG -- RESEARCH_NEEDED --> HANDOFF_R[📤 CROSS_GROUP_HANDOFF<br/>转交技术调研组]
+    SIG -- POST_AUDIT_REQUIRED --> POST_AUDIT[📋 POST_AUDIT_NOTICE<br/>通知总指挥补审]
+    SIG -- KNOWLEDGE_WORTHY --> KNOW_CHECK{满足知识触发条件?}
+    SIG -- 无信号 --> LOG[📝 更新SESSION_LOG]
+
+    HANDOFF_D --> CONFIRM_H{总指挥确认转交?}
+    HANDOFF_K --> CONFIRM_H
+    HANDOFF_R --> CONFIRM_H
+    CONFIRM_H -- 确认 --> DISPATCH
+    CONFIRM_H -- 暂缓 --> LOG
+
+    POST_AUDIT --> CMD_DECIDE{总指挥决定}
+    CMD_DECIDE -- 立即补审 --> DISPATCH
+    CMD_DECIDE -- 稍后/放弃 --> LOG
+
+    KNOW_CHECK -- 满足 --> KNOW[📤 KNOWLEDGE_TRIGGER<br/>自动触发知识管理组]
+    KNOW_CHECK -- 不满足 --> LOG
+
+    KNOW --> KM_SUB[📚 知识管理组]
+
+    %% ===== 知识管理与培训组 =====
+    subgraph KM_SUB[📚 知识管理与培训组]
+        KM1[📚 知识管理员<br/>从任务产出提取知识<br/>经验+模式+教训]
+        KM1 --> KM2[📚 知识管理员自检<br/>可搜索性+时效标注+来源引用]
+        KM2 --> KM3{👑 主控<br/>知识质量合规检查}
+        KM3 -- 合规 --> KM4[🎓 培训设计师<br/>评估可教学性]
+        KM3 -- 不合规 --> KM_FIX[📤 打回知识管理员]
+        KM_FIX --> KM1
+        KM4 -- 可教学 --> KM5[🎓 设计/更新学习路径<br/>分级标注+前置要求+练习]
+        KM4 -- 不可教学 --> KM_FEEDBACK[📤 打回知识管理员<br/>附可教学性缺陷]
+        KM_FEEDBACK --> KM1
+        KM5 --> KM6{👑 主控<br/>学习路径时效检查}
+        KM6 -- 有过期条目 --> KM_STALE[📤 通知知识管理员更新]
+        KM_STALE --> KM1
+        KM6 -- 全部有效 --> KM7[✅ 学习路径生效]
+        KM7 --> KM8[🎓 培训设计师<br/>执行培训/发布路径]
+        KM8 --> KM9[📊 受训Agent参与实际任务]
+        KM9 --> KM10{👑 主控<br/>培训效果跟踪}
+        KM10 -- 有效 --> KM_REPORT[📋 更新知识健康度报告]
+        KM10 -- 无效 --> KM_REVISE[🎓 培训设计师修订路径]
+        KM_REVISE --> KM5
+    end
+
+    KM_REPORT --> LOG
+
+    LOG --> SESSION_END[📋 会话结束摘要<br/>全部任务+全部信号+全部转交]
+
+    %% ===== 样式 =====
+    style U fill:#37474f,stroke:#ffcc80,stroke-width:3px,color:#fff
+    style M fill:#ffcc80,stroke:#e65100
+    style ROUTE fill:#c8e6c9,stroke:#2e7d32
+    style UNKNOWN fill:#ffcdd2,stroke:#c62828
+    style DISPATCH fill:#e3f2fd,stroke:#1565c0
+    style SIG fill:#fff3e0,stroke:#ef6c00
+    style LOG fill:#f5f5f5,stroke:#9e9e9e
+    style SESSION_END fill:#f5f5f5,stroke:#9e9e9e
+
+    style D_SUB fill:#fff9c4,stroke:#f9a825
+    style F_SUB fill:#e3f2fd,stroke:#1565c0
+    style B_SUB fill:#f3e5f5,stroke:#8e24aa
+    style R_SUB fill:#e0f2f1,stroke:#00695c
+    style K_SUB fill:#fce4ec,stroke:#c62828
+    style KM_SUB fill:#e1f5fe,stroke:#0277bd
+
+    style D_CLOSE fill:#c8e6c9,stroke:#2e7d32
+    style F_CLOSE fill:#c8e6c9,stroke:#2e7d32
+    style B_CLOSE fill:#c8e6c9,stroke:#2e7d32
+    style R_CLOSE fill:#c8e6c9,stroke:#2e7d32
+    style K_CLOSE fill:#c8e6c9,stroke:#2e7d32
+    style E_CLOSE fill:#c8e6c9,stroke:#2e7d32
+    style R_CLOSE fill:#c8e6c9,stroke:#2e7d32
+    style K_RESIDUAL fill:#ede7f6,stroke:#4527a0
+    style POST_AUDIT fill:#ffcdd2,stroke:#c62828
+    style KNOW fill:#e1f5fe,stroke:#0277bd

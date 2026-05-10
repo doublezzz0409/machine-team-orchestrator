@@ -1,0 +1,118 @@
+总调度版本 - 配置文件总览
+
+# 总调度层定位
+
+总调度层是六个组之上的统一入口，不是第七个组。
+它的职责只有五项：任务分类路由、跨组转交、事件协议、优先级仲裁、UNKNOWN_TASK 兜底。
+
+本文件夹是完整可部署的独立包，无需依赖"独立调动版本"。
+
+# 目录结构
+
+总调度版本/
+├── CLAUDE.md                              ← 总调度层主控
+├── .claude/agents/                        ← 20 个子 Agent（扁平化，按组前缀命名）
+│   ├── defect-programmer-standard.md
+│   ├── defect-programmer-fast.md
+│   ├── defect-auditor-a.md
+│   ├── defect-auditor-b.md
+│   ├── defect-qa-validator.md
+│   ├── feature-pm.md
+│   ├── feature-architect.md
+│   ├── feature-engineer.md
+│   ├── feature-qa.md
+│   ├── feature-technical-writer.md
+│   ├── debt-auditor.md
+│   ├── debt-refactor-engineer.md
+│   ├── debt-regression-qa.md
+│   ├── research-engineer.md
+│   ├── research-tech-evaluator.md
+│   ├── risk-security-auditor.md
+│   ├── risk-hardening-engineer.md
+│   ├── risk-qa.md
+│   ├── knowledge-manager.md
+│   └── knowledge-training-designer.md
+├── groups/                                ← 6 个组的内部 SOP
+│   ├── defect-fix.md
+│   ├── feature-dev.md
+│   ├── debt-cleanup.md
+│   ├── research.md
+│   ├── risk-mitigation.md
+│   └── knowledge-mgmt.md
+├── docs/
+│   ├── 方法论.txt
+│   └── 总调度版本 - 配置文件总览.txt（本文件）
+└── diagrams/
+    └── 总调度版本.mermaid
+
+# 文件清单
+
+## 核心文件
+
+| # | 文件名 | 路径 | 核心职责 |
+|---|--------|------|---------|
+| 1 | CLAUDE.md | CLAUDE.md | 总调度层：任务路由、跨组转交、事件触发、优先级仲裁 |
+
+## 子 Agent（20 个）
+
+| # | Agent 名称 | 所属组 | 核心职责 |
+|---|-----------|--------|---------|
+| 1 | defect-programmer-standard | 缺陷修复组 | 根因分析、修复方案、执行修改、测试草案 |
+| 2 | defect-programmer-fast | 缺陷修复组 | 快速止血、紧急修复、临时方案 |
+| 3 | defect-auditor-a | 缺陷修复组 | 安全漏洞、边界条件、危险假设审查 |
+| 4 | defect-auditor-b | 缺陷修复组 | 性能影响、架构合理性、技术债务审查 |
+| 5 | defect-qa-validator | 缺陷修复组 | 测试执行、回归排查、补充观察、质量否决 |
+| 6 | feature-pm | 功能开发组 | 需求定义、验收条件、优先级排序、验收否决 |
+| 7 | feature-architect | 功能开发组 | 技术方案设计、架构约束、方案否决、债务记录 |
+| 8 | feature-engineer | 功能开发组 | 需求理解、代码实现、自测报告、文档变更标注 |
+| 9 | feature-qa | 功能开发组 | 验收条件前置审查、测试设计与执行、质量否决 |
+| 10 | feature-technical-writer | 功能开发组 | 文档撰写更新、API 模糊性打回 |
+| 11 | debt-auditor | 技术债务清理组 | 债务识别与定义、清理方案设计、不可变行为红线 |
+| 12 | debt-refactor-engineer | 技术债务清理组 | 方案可行性评估、代码重构执行、风险暂停声明 |
+| 13 | debt-regression-qa | 技术债务清理组 | 行为不变验证、债务清除验证、否决交付 |
+| 14 | research-engineer | 技术调研组 | 实验设计、原型搭建、数据收集、初步结论 |
+| 15 | research-tech-evaluator | 技术调研组 | 实验方法审核、最终建议、风险量化、替代方案 |
+| 16 | risk-security-auditor | 风险缓解组 | 风险识别与分级、加固方向制定、优先级排序 |
+| 17 | risk-hardening-engineer | 风险缓解组 | 方案可行性评估、加固执行、临时缓解措施 |
+| 18 | risk-qa | 风险缓解组 | 三重验证（功能回归/性能基线/攻击模拟） |
+| 19 | knowledge-manager | 知识管理组 | 从任务产出中提取知识、时效标注、来源引用 |
+| 20 | knowledge-training-designer | 知识管理组 | 可教学性评估、学习路径设计、技能缺口诊断 |
+
+## 组 SOP（6 个）
+
+| # | 文件名 | 路径 | 对应组 |
+|---|--------|------|--------|
+| 1 | defect-fix.md | groups/defect-fix.md | 缺陷修复组 |
+| 2 | feature-dev.md | groups/feature-dev.md | 功能开发组 |
+| 3 | debt-cleanup.md | groups/debt-cleanup.md | 技术债务清理组 |
+| 4 | research.md | groups/research.md | 技术调研与原型验证组 |
+| 5 | risk-mitigation.md | groups/risk-mitigation.md | 风险缓解与安全加固组 |
+| 6 | knowledge-mgmt.md | groups/knowledge-mgmt.md | 知识管理与培训组 |
+
+## 文档与图表
+
+| # | 文件名 | 路径 | 内容 |
+|---|--------|------|------|
+| 1 | 方法论.txt | docs/方法论.txt | 角色设计方法论（四步法、五类制衡、腐化预判） |
+| 2 | 配置文件总览 | docs/总调度版本 - 配置文件总览.txt | 本文件 |
+| 3 | 流程图 | diagrams/总调度版本.mermaid | 总调度层流程图（Mermaid 格式） |
+
+# 跨组信号协议
+
+| 信号 | 产生方 | 消费方 | 触发条件 |
+|------|--------|--------|---------|
+| TECH_DEBT_FOUND | 任意组 | 技术债务清理组 | 任务产出中发现技术债务 |
+| SECURITY_RISK_FOUND | 任意组 | 风险缓解与安全加固组 | 任务产出中发现安全漏洞 |
+| POST_AUDIT_REQUIRED | 缺陷修复组（紧急通道） | 风险缓解组/债务清理组 | 紧急通道跳过了审计 |
+| KNOWLEDGE_WORTHY | 任意组 | 知识管理与培训组 | 任务产出包含可复用知识 |
+| RESEARCH_NEEDED | 任意组 | 技术调研与原型验证组 | 遇到技术不确定性需要调研 |
+
+# 部署说明
+
+1. 将整个"总调度版本"文件夹复制到目标项目根目录
+2. 确保 .claude/agents/ 目录结构不变
+3. 在 Claude Code 中打开项目，CLAUDE.md 会自动加载为总调度层
+4. 用户提交任务时，总调度层自动分类、路由、调度
+
+Phase 1（当前）：总调度层 + 20 个 Agent + 6 个组 SOP，完整可部署。
+Phase 2（后续）：为 groups/ 中的 SOP 关闭步骤增加 TASK_META 标准化信封。
