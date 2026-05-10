@@ -25,7 +25,11 @@
 20 个子 Agent — .claude/agents/*.md
 ```
 
-![总调度版本完整流程图](diagrams/总调度版本完整流程图.svg)
+<a href="diagrams/总调度版本完整流程图.svg">
+  <img src="diagrams/总调度版本完整流程图.svg" alt="总调度版本完整流程图" width="100%">
+</a>
+
+> 点击图片可查看原图
 
 ---
 
