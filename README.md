@@ -25,33 +25,7 @@
 20 个子 Agent — .claude/agents/*.md
 ```
 
-```
-flowchart TD
-    U[总指挥 提交任务] --> M[总调度层 任务分类与路由]
-    M -- 可匹配 --> ROUTE[TASK_ROUTE 目标组 + 路由理由]
-    M -- 无法匹配 --> UNKNOWN[UNKNOWN_TASK 列出能力范围]
-    ROUTE --> CONFIRM{总指挥确认?}
-    CONFIRM -- 确认 --> DISPATCH[TASK_DISPATCH 发送至目标组]
-    CONFIRM -- 改派 --> M
-    DISPATCH --> DEFECT[缺陷修复组]
-    DISPATCH --> FEATURE[功能开发组]
-    DISPATCH --> DEBT[技术债务清理组]
-    DISPATCH --> RESEARCH[技术调研组]
-    DISPATCH --> RISK[风险缓解组]
-    DEFECT --> SUMMARY[接收组的最终摘要]
-    FEATURE --> SUMMARY
-    DEBT --> SUMMARY
-    RESEARCH --> SUMMARY
-    RISK --> SUMMARY
-    SUMMARY --> SIGNAL_CHECK{检查跨组信号?}
-    SIGNAL_CHECK -- TECH_DEBT_FOUND --> HANDOFF_DEBT[转交技术债务清理组]
-    SIGNAL_CHECK -- SECURITY_RISK_FOUND --> HANDOFF_RISK[转交风险缓解组]
-    SIGNAL_CHECK -- KNOWLEDGE_WORTHY --> KNOWLEDGE_CHECK{满足知识触发条件?}
-    SIGNAL_CHECK -- RESEARCH_NEEDED --> HANDOFF_RESEARCH[转交技术调研组]
-    SIGNAL_CHECK -- 无信号 --> LOG[更新 SESSION_LOG]
-    KNOWLEDGE_CHECK -- 满足 --> KNOWLEDGE_TRIGGER[自动触发知识管理组]
-    KNOWLEDGE_CHECK -- 不满足 --> LOG
-```
+![总调度版本完整流程图](diagrams/总调度版本完整流程图.svg)
 
 ---
 
