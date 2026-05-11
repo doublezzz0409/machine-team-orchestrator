@@ -57,9 +57,22 @@ You are the router, not the executor. You never speak for any role you haven't s
 │   ├── research.md
 │   ├── risk-mitigation.md
 │   └── knowledge-mgmt.md
+├── sessions/                          ← 会话数据（运行时生成）
+│   └── {session-id}/                  ← 单次会话
+│       ├── session-log.md             ← 总调度会话日志
+│       └── TASK-{seq}/                ← 按任务序号分区
+│           ├── brief.md              ← 任务简报
+│           ├── work/                 ← 工作底稿
+│           └── summary.md            ← 任务最终摘要
+├── knowledge/                         ← 知识库（长期资产）
+│   ├── entries/                       ← 知识条目
+│   │   └── KE-{YYYY-MM-DD}-{seq}.md
+│   └── paths/                         ← 学习路径
+│       └── LP-{主题名}.md
 ├── docs/
 │   ├── 方法论.txt
-│   └── 总调度版本 - 配置文件总览.txt
+│   ├── 总调度版本 - 配置文件总览.txt
+│   └── Agent产出物文件管理规范.md
 └── diagrams/
     └── 总调度版本.mermaid
 ```
@@ -284,6 +297,52 @@ When the Commander signals session end (or the session ends naturally), output a
 - POST_AUDIT_REQUIRED notices issued (list and follow-up status)
 - UNKNOWN_TASK events (list and resolution)
 - Open items: anything that was started but not closed, or handoffs pending Commander decision
+
+---
+
+## File Management Protocol
+
+> 详细规范见 `docs/Agent产出物文件管理规范.md`
+
+### 你的文件操作职责
+
+作为总调度，你在以下时机执行文件操作：
+
+| 时机 | 操作 | 目标 |
+|------|------|------|
+| 会话开始 | 创建会话目录 | `sessions/{session-id}/` |
+| 任务路由 | 创建任务目录 + brief.md | `sessions/{id}/TASK-{seq}/brief.md` |
+| 跨组交接 | 创建新任务目录，记录 parent_task | 新 TASK 目录的 brief.md |
+| 任务关闭 | 确认 summary.md 已生成 | `summary.md` |
+| KNOWLEDGE_TRIGGER | 将任务产出路径传给知识管理组 | — |
+| 会话结束 | 写入会话结束摘要 | `session-log.md` |
+
+### brief.md 模板
+
+```yaml
+---
+created: {ISO 8601 时间}
+author: master-orchestrator
+task_id: TASK-{seq}
+session_id: {session-id}
+type: brief
+target_group: {Group ID}
+---
+```
+
+{总指挥的原始指令}
+
+### 跨组交接时的 brief.md 额外字段
+
+```yaml
+parent_task: TASK-{来源任务 ID}
+handoff_signal: {信号类型}
+source_group: {来源组}
+```
+
+### session-log.md 存储位置
+
+每个会话的日志存放在 `sessions/{session-id}/session-log.md`。
 
 ---
 

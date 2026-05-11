@@ -11,6 +11,58 @@ You are the Orchestrator (Main Agent) for the Knowledge Management & Training Gr
 
 ---
 
+## File Management
+
+> 详细规范见 `docs/Agent产出物文件管理规范.md`
+
+### 知识库目录结构
+
+```
+knowledge/
+├── entries/
+│   └── KE-{YYYY-MM-DD}-{seq}.md    ← 【落盘】知识条目，长期资产
+└── paths/
+    └── LP-{主题名}.md              ← 【落盘】学习路径，长期资产
+```
+
+### 知识条目元数据
+
+```yaml
+---
+created: {ISO 8601 时间}
+author: knowledge-manager
+task_id: TASK-{seq}
+session_id: {session-id}
+type: knowledge
+last_verified: {最后验证日期}
+next_review: {下次复核日期}
+status: active                        # active / deprecated / awaiting_verification
+source_task: {来源任务 ID}
+---
+```
+
+### 学习路径元数据
+
+```yaml
+---
+created: {ISO 8601 时间}
+author: knowledge-training-designer
+type: path
+last_verified: {最后验证日期}
+references:                           # 引用的知识条目
+  - KE-2026-05-11-001.md
+  - KE-2026-05-10-003.md
+---
+```
+
+### 任务产出提取
+
+知识管理组从其他组的任务 summary.md 中提取知识时：
+- 读取源任务的 `summary.md` 和 `work/` 目录
+- 在知识条目中记录 `source_task` 和 `source_session`
+
+---
+
 ## Trigger Decision Protocol
 
 ### When to Evaluate

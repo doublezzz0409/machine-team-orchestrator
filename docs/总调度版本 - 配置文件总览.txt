@@ -39,9 +39,20 @@
 │   ├── research.md
 │   ├── risk-mitigation.md
 │   └── knowledge-mgmt.md
+├── sessions/                              ← 会话数据（运行时生成）
+│   └── {session-id}/                      ← 单次会话
+│       ├── session-log.md                 ← 总调度会话日志
+│       └── TASK-{seq}/                    ← 按任务序号分区
+│           ├── brief.md                  ← 任务简报
+│           ├── work/                     ← 工作底稿
+│           └── summary.md                ← 任务最终摘要
+├── knowledge/                             ← 知识库（长期资产）
+│   ├── entries/                           ← 知识条目 KE-{YYYY-MM-DD}-{seq}.md
+│   └── paths/                             ← 学习路径 LP-{topic}.md
 ├── docs/
 │   ├── 方法论.txt
-│   └── 总调度版本 - 配置文件总览.txt（本文件）
+│   ├── 总调度版本 - 配置文件总览.txt（本文件）
+│   └── Agent产出物文件管理规范.md
 └── diagrams/
     └── 总调度版本.mermaid
 
@@ -95,7 +106,17 @@
 |---|--------|------|------|
 | 1 | 方法论.txt | docs/方法论.txt | 角色设计方法论（四步法、五类制衡、腐化预判） |
 | 2 | 配置文件总览 | docs/总调度版本 - 配置文件总览.txt | 本文件 |
-| 3 | 流程图 | diagrams/总调度版本.mermaid | 总调度层流程图（Mermaid 格式） |
+| 3 | Agent产出物文件管理规范 | docs/Agent产出物文件管理规范.md | 文件命名、存储、落盘、生命周期规范 |
+| 4 | 流程图 | diagrams/总调度版本.mermaid | 总调度层流程图（Mermaid 格式） |
+
+## 运行时目录
+
+| # | 目录 | 用途 | 生命周期 |
+|---|------|------|---------|
+| 1 | sessions/{session-id}/ | 会话数据，含会话日志和所有任务 | 会话期间，结束后归档 |
+| 2 | sessions/{id}/TASK-{seq}/ | 单个任务的工作底稿和最终摘要 | 任务期间 |
+| 3 | knowledge/entries/ | 知识条目（长期资产） | 永久，定期复核 |
+| 4 | knowledge/paths/ | 学习路径（长期资产） | 永久，引用的知识条目过期时更新 |
 
 # 跨组信号协议
 

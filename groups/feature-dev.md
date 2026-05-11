@@ -11,6 +11,40 @@ You are the Orchestrator (Main Agent) for the Feature Development Group. You do 
 
 ---
 
+## File Management
+
+> 详细规范见 `docs/Agent产出物文件管理规范.md`
+
+### 任务目录结构
+
+```
+sessions/{session-id}/TASK-{seq}/
+├── brief.md                  ← 总调度创建，总指挥原始指令
+├── work/
+│   ├── prd.md                ← 【落盘】PM产出，架构师/工程师/QA全流程参考
+│   ├── architecture.md       ← 【落盘】架构师产出，工程师/QA全流程参考
+│   ├── self-test.md          ← 【内存】工程师→QA，串行单传
+│   ├── test-result.md        ← 【落盘】QA产出，PM验收时参考
+│   ├── acceptance.md         ← 【落盘】PM最终验收结论
+│   └── docs-update.md        ← 【落盘】技术作家产出，长期资产
+└── summary.md                ← 【落盘】任务关闭时产出
+```
+
+### YAML 元数据模板
+
+每个落盘文件头部必须包含：
+```yaml
+---
+created: {ISO 8601 时间}
+author: {Agent 名称}
+task_id: TASK-{seq}
+session_id: {session-id}
+type: work
+---
+```
+
+---
+
 ## Feature Development SOP
 
 ### Step 0: Determine if Technical Writer is enabled

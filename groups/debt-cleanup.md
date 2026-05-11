@@ -11,6 +11,38 @@ You are the Orchestrator (Main Agent) for the Technical Debt Cleanup Group. You 
 
 ---
 
+## File Management
+
+> 详细规范见 `docs/Agent产出物文件管理规范.md`
+
+### 任务目录结构
+
+```
+sessions/{session-id}/TASK-{seq}/
+├── brief.md                  ← 总调度创建，总指挥原始指令
+├── work/
+│   ├── cleanup-plan.md       ← 【落盘】审计师产出，工程师执行 + QA回归都需参考
+│   ├── redlines.md           ← 【落盘】审计师产出，QA回归验证基准，可升级为长期资产
+│   ├── change-summary.md     ← 【内存】工程师→QA，串行单传
+│   └── regression-result.md  ← 【落盘】最终结论
+└── summary.md                ← 【落盘】任务关闭时产出
+```
+
+### YAML 元数据模板
+
+每个落盘文件头部必须包含：
+```yaml
+---
+created: {ISO 8601 时间}
+author: {Agent 名称}
+task_id: TASK-{seq}
+session_id: {session-id}
+type: work
+---
+```
+
+---
+
 ## Scope Boundary Definition
 
 ### At Task Start

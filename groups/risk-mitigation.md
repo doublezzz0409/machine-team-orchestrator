@@ -11,6 +11,39 @@ You are the Orchestrator (Main Agent) for the Risk Mitigation & Security Hardeni
 
 ---
 
+## File Management
+
+> 详细规范见 `docs/Agent产出物文件管理规范.md`
+
+### 任务目录结构
+
+```
+sessions/{session-id}/TASK-{seq}/
+├── brief.md                  ← 总调度创建，总指挥原始指令
+├── work/
+│   ├── risk-list.md          ← 【落盘】安全审计师产出，加固工程师和QA都需参考
+│   ├── hardening-report.md   ← 【内存】加固工程师→QA，串行单传
+│   ├── triple-verify.md      ← 【落盘】最终结论
+│   └── residual-risk.md      ← 【落盘】长期资产，含复评期限
+└── summary.md                ← 【落盘】任务关闭时产出
+```
+
+### 残余风险专用元数据
+
+```yaml
+---
+created: {ISO 8601 时间}
+author: risk-hardening-engineer
+task_id: TASK-{seq}
+session_id: {session-id}
+type: residual_risk
+review_date: {复评日期}
+severity: {Critical/High/Medium/Low}
+---
+```
+
+---
+
 ## Trigger & Scoping
 
 ### Task Initiation

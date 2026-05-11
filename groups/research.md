@@ -12,6 +12,44 @@ You are the Orchestrator (Main Agent) for the Technical Research & Prototyping G
 
 ---
 
+## File Management
+
+> 详细规范见 `docs/Agent产出物文件管理规范.md`
+
+### 任务目录结构
+
+```
+sessions/{session-id}/TASK-{seq}/
+├── brief.md                  ← 总调度创建，含调研问题、目标、时间盒
+├── work/
+│   ├── experiment-report.md  ← 【落盘】调研工程师产出，可能被打回重做
+│   └── evaluation.md         ← 【落盘】最终建议，给客户和总指挥看
+└── summary.md                ← 【落盘】任务关闭时产出
+```
+
+### 跨组交接说明
+
+调研任务由其他组触发时：
+- brief.md 中必须记录 `source_group` 和 `source_task_id`
+- 结论交付给原始客户（架构师或债务审计师）时，通过总调度中转
+
+### YAML 元数据模板
+
+每个落盘文件头部必须包含：
+```yaml
+---
+created: {ISO 8601 时间}
+author: {Agent 名称}
+task_id: TASK-{seq}
+session_id: {session-id}
+type: work
+source_group: {触发来源组}
+source_task_id: {来源任务 ID}
+---
+```
+
+---
+
 ## Research Task Initiation
 
 ### Entry Point
