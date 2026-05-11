@@ -1,0 +1,61 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/routing-gate.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/auditor-isolation.js"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/code-gate.js"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/signal-detector.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/session-log-check.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/sop-reminder.js"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/routing-cleanup.js"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "additionalDirectories": [
+      "C:\\Users\\zz\\Desktop\\流程设计\\总调度版本\\.claude"
+    ]
+  }
+}

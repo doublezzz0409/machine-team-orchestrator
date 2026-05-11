@@ -13,3 +13,8 @@ desktop.ini
 # Temp files
 *.tmp
 *.log
+
+# Runtime (Claude Code)
+.claude/.routing-confirmed
+.claude/settings.json
+sessions/
