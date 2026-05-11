@@ -9,6 +9,7 @@
 - **角色分离** — 20 个子 Agent，各司其职，互不越界
 - **信息隔离** — 双审计师无法看到彼此的原始报告，防止串通
 - **流程刚性** — 每个组有严格的 SOP，不可跳步（除非总指挥授权）
+- **Hook 强制执行** — 7 个系统级 Hook 将工作流协议从"建议"升级为"物理约束"
 - **信号驱动** — 任务完成后自动检测跨组信号，触发后续流程
 - **文件契约** — 产出物是角色间的显性契约，有明确的命名、存储和生命周期规范
 
@@ -42,27 +43,37 @@
 ```
 总调度版本/
 ├── CLAUDE.md                          ← 总调度层主控（自动加载）
-├── .claude/agents/                    ← 20 个子 Agent 定义
-│   ├── defect-programmer-standard.md
-│   ├── defect-programmer-fast.md
-│   ├── defect-auditor-a.md
-│   ├── defect-auditor-b.md
-│   ├── defect-qa-validator.md
-│   ├── feature-pm.md
-│   ├── feature-architect.md
-│   ├── feature-engineer.md
-│   ├── feature-qa.md
-│   ├── feature-technical-writer.md
-│   ├── debt-auditor.md
-│   ├── debt-refactor-engineer.md
-│   ├── debt-regression-qa.md
-│   ├── research-engineer.md
-│   ├── research-tech-evaluator.md
-│   ├── risk-security-auditor.md
-│   ├── risk-hardening-engineer.md
-│   ├── risk-qa.md
-│   ├── knowledge-manager.md
-│   └── knowledge-training-designer.md
+├── .claude/
+│   ├── agents/                        ← 20 个子 Agent 定义
+│   │   ├── defect-programmer-standard.md
+│   │   ├── defect-programmer-fast.md
+│   │   ├── defect-auditor-a.md
+│   │   ├── defect-auditor-b.md
+│   │   ├── defect-qa-validator.md
+│   │   ├── feature-pm.md
+│   │   ├── feature-architect.md
+│   │   ├── feature-engineer.md
+│   │   ├── feature-qa.md
+│   │   ├── feature-technical-writer.md
+│   │   ├── debt-auditor.md
+│   │   ├── debt-refactor-engineer.md
+│   │   ├── debt-regression-qa.md
+│   │   ├── research-engineer.md
+│   │   ├── research-tech-evaluator.md
+│   │   ├── risk-security-auditor.md
+│   │   ├── risk-hardening-engineer.md
+│   │   ├── risk-qa.md
+│   │   ├── knowledge-manager.md
+│   │   └── knowledge-training-designer.md
+│   ├── hooks/                         ← 7 个系统级 Hook（强制执行工作流协议）
+│   │   ├── routing-gate.js            ← PreToolUse: Agent 路由门禁
+│   │   ├── code-gate.js              ← PreToolUse: Write|Edit 代码门禁
+│   │   ├── auditor-isolation.js      ← PreToolUse: 双盲审计隔离
+│   │   ├── signal-detector.js        ← PostToolUse: 跨组信号检测
+│   │   ├── session-log-check.js      ← PostToolUse: SESSION_LOG 维护
+│   │   ├── sop-reminder.js           ← PostToolUse: SOP 执行强制
+│   │   └── routing-cleanup.js        ← PostToolUse: 路由标记清理
+│   └── settings.json                 ← Hook 注册配置
 ├── groups/                            ← 6 个组的内部 SOP
 │   ├── defect-fix.md
 │   ├── feature-dev.md
@@ -353,6 +364,16 @@ type: work
 
 ### 腐化模式预判
 
+```
+1. 紧急通道任务（P0 安全漏洞、服务中断）
+2. POST_AUDIT_REQUIRED 跟进
+3. 活跃组转交（等待分发的跨组信号）
+4. 标准任务
+5. 知识管理（始终异步，永不紧急）
+```
+
+### 腐化模式预判
+
 每个角色在设计阶段就预判了最可能的腐化模式并内置预防机制。六组共预判了 30+ 种腐化模式：
 
 | 腐化类型 | 典型表现 | 预防原则 |
@@ -363,6 +384,72 @@ type: work
 | 确认偏误 | 只找支持自己预判的证据 | 独立审核角色天然携带怀疑眼光 |
 | 范围蔓延 | 超出授权范围做事 | 主 Agent 检查输出与授权范围一致性 |
 | 模糊化逃避 | 用模糊结论规避责任 | 强制输出格式（三态/量化） |
+
+---
+
+## Hook 强制执行系统
+
+### 设计原理
+
+CLAUDE.md 中的工作流协议是上下文提示（context prompt），不是系统级强制。Claude 的默认行为模式是"执行者"而非"路由器"，会本能跳过它认为"不必要"的中间环节。
+
+解决方案：通过 Claude Code 的 PreToolUse/PostToolUse Hook 机制，将关键协议从"建议"升级为"物理约束"。
+
+### Hook 矩阵
+
+| Hook | 类型 | 匹配工具 | 行为 | 对应工作流规则 |
+|------|------|---------|------|-------------|
+| `routing-gate.js` | PreToolUse | Agent | **阻断** | 必须先路由再派发 |
+| `code-gate.js` | PreToolUse | Write\|Edit | **阻断** | 路由前不能写项目代码 |
+| `auditor-isolation.js` | PreToolUse | Agent | **阻断** | 双盲审计信息隔离 |
+| `signal-detector.js` | PostToolUse | Agent | **阻断** | 跨组信号必须通知 Commander |
+| `session-log-check.js` | PostToolUse | Agent | **阻断** | SESSION_LOG 必须维护 |
+| `sop-reminder.js` | PostToolUse | Agent | **阻断** | Agent 必须按 SOP 执行 |
+| `routing-cleanup.js` | PostToolUse | Write\|Edit | 自动清理 | 任务完成后重置路由标记 |
+
+**6 个阻断 + 1 个清理。全部强制，无提醒。**
+
+### 状态机
+
+```
+用户提交任务
+    ↓
+Claude 想调用 Agent → hook 拦截 → BLOCKED（无标记文件）
+    ↓
+Claude 被迫输出 TASK_ROUTE → 等用户确认
+    ↓
+用户确认 → Claude 创建 .claude/.routing-confirmed 文件
+    ↓
+Claude 调用 Agent → hook 检查标记存在 → ALLOWED
+    ↓
+Agent 完成 → signal-detector 扫描输出 → 有信号则阻断
+    ↓
+Claude 处理信号 → session-log-check 强制写日志
+    ↓
+sop-reminder 强制读 SOP → 组内按 SOP 执行
+    ↓
+产出 summary.md → routing-cleanup 自动删除标记
+    ↓
+下一个任务 → 必须重新路由
+```
+
+### 技术实现
+
+Hook 遵循 ECC 的 hook 系统协议：
+- **stdin JSON**：通过 stdin 接收 `{ tool_name, tool_input, tool_output }`
+- **Exit Code 语义**：0 = 放行，2 = 阻断
+- **`run(rawInput)` 导出**：兼容快速路径（require 直接调用）
+- **1MB stdin 截断**：防止输入撑爆
+
+配置在 `.claude/settings.json` 中注册，通过 `matcher` + `hooks[]` 格式定义。
+
+### 设计哲学
+
+> Hook 守"物理边界"（进出口），流程守"行为逻辑"（内部流转）。
+
+- 4 个守物理边界的 hook（routing-gate、code-gate、auditor-isolation、routing-cleanup）是不可替代的
+- 3 个强制行为的 hook（signal-detector、session-log-check、sop-reminder）确保流程步骤不被跳过
+- 流程步骤阻断不是"限制能力"，是"创造发现问题的条件"
 
 ---
 
@@ -463,6 +550,53 @@ Claude 会自动：
 
 ---
 
+## 设计经验：AI 自主性与限制的关系
+
+### 核心公式
+
+```
+AI 效率风险 = AI 自主性 × 限制
+```
+
+两者反向变动：自主性高则限制应低，限制高则自主性被压缩。
+
+### 两种路径对比
+
+| | 机械式强制（如 GateGuard） | 结构化审查（如双盲审计） |
+|---|---------------------------|-------------------------|
+| 策略 | 增加限制，降低自主性 | 结构化审查，保持自主性 |
+| 检查时机 | 执行前 | 执行后 |
+| 检查方式 | 复述事实 | 独立审查产出 |
+| 视角数 | 1（自己的） | 2（安全 + 架构） |
+| 能发现的问题 | "我说错了" | "我想错了" |
+
+### 关键发现
+
+**GateGuard 防的是口误，双盲审计防的是思维盲区。**
+
+流程步骤阻断不是"限制能力"，是"创造发现问题的条件"。如果没有 SOP 强制按步骤走，AI 会跳过审计直接交付，错误就不会被发现。
+
+### 流程设计 6 原理
+
+| 原理 | 说明 | 本项目体现 |
+|------|------|----------|
+| 门禁 | 关键节点是物理阻断 | 路由 gate、代码 gate |
+| 隔离 | 信息不对称是制衡基础 | 双盲审计 |
+| 输出格式约束 | 结构化输出让下游直接用 | 意图标签表、TASK_ROUTE |
+| 信号 | 完成不是结束，检测才是 | 跨组信号协议 |
+| 渐进式约束 | 约束随风险递增 | 紧急 3 步 vs 标准 8 步 |
+| 可观测性 | 状态可查询 | SESSION_LOG |
+
+### 未来方向
+
+- 短期：流程设计 70% + Hook 30%（当前模型有长上下文遗忘、效率偏好、角色漂移）
+- 长期：流程设计 95% + 轻量提示 5%（模型越强，越不需要物理强制）
+- **流程设计是长期资产，Hook 是短期补丁。**
+
+---
+
 ## License
+
+MIT
 
 MIT
