@@ -99,6 +99,27 @@ Summon `defect-qa-validator`. Provide the final code state, programmer's test ca
 ---
 
 ### Emergency Channel SOP (Lean)
+
+> **设计意图**：紧急通道用于 P0 止血，牺牲审计完整性换取响应速度。因此止血完成后**必须**自动触发补审信号，确保安全审计和架构审计不会被永久跳过。
+
 1. Summon `defect-programmer-fast` for an immediate fix plan and simple self-test.
 2. Summon `defect-auditor-a` for a rapid security-only scan of the fix plan.
 3. Summon `defect-qa-validator` for verification. If failed, go back to Step 1; otherwise, close and mark as **[Emergency Channel]** in the final summary.
+4. **MANDATORY — Auto-trigger POST_AUDIT_REQUIRED**: After the emergency fix is closed, you MUST append the following signal to the task summary. This is NOT optional — skipping this step defeats the purpose of the emergency/standard dual-channel design.
+
+   ```markdown
+   ## POST_AUDIT_REQUIRED
+   - source_group: DEFECT
+   - source_task_id: TASK-{当前任务 ID}
+   - skipped_audit:
+     - 安全审计（仅做了快速扫描，未执行完整双盲审计）
+     - 架构与性能审计（紧急通道完全跳过）
+   - recommended_followup: 24小时内
+   - risk_points:
+     - 紧急修复可能引入新的安全边界问题
+     - 修复方案未经架构合理性验证
+     - 未经过交叉质疑环节，可能存在盲区
+   - emergency_fix_summary: [简述紧急修复内容，供补审参考]
+   ```
+
+   The Master Orchestrator will detect this signal and present a `POST_AUDIT_NOTICE` to the Commander per the Cross-Group Handoff Protocol. The Commander decides whether to trigger the full Standard Channel audit immediately or schedule it.

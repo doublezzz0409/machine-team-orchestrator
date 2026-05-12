@@ -84,7 +84,7 @@ function run(rawInput) {
 
   } catch (error) {
     console.error(`[RoutingGate] Parse error: ${error.message}`);
-    return { exitCode: 0 };
+    return { exitCode: 2 };
   }
 }
 
@@ -100,6 +100,9 @@ if (require.main === module) {
   });
 
   process.stdin.on('end', () => {
+    if (!data || data.trim().length === 0) {
+      process.exit(0);
+    }
     const result = run(data);
     process.exit(result.exitCode);
   });

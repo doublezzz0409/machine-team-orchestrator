@@ -302,25 +302,36 @@ active → (验证过期) → awaiting_verification → (重新验证) → activ
 规则：
 - seq 为会话内任务序号，从 001 开始
 - 同一会话内递增
-- 跨组交接不产生新任务 ID，沿用原任务 ID
+- 跨组交接产生新的任务 ID（见 7.3）
 ```
 
 ### 7.3 跨组交接的文件归属
 
 当一个组的任务触发跨组交接时：
 - 新组的任务使用**新的 TASK-ID**
-- 但 summary.md 中必须记录 `parent_task: TASK-原始ID`，形成追溯链
+- 新任务的 brief.md 中必须记录 `parent_task: TASK-{来源任务ID}` 和 `handoff_signal`，形成追溯链
+- 源任务的 summary.md 中记录 `child_task: TASK-{新任务ID}`，形成双向链接
 
+这样每个 TASK 目录是自包含的（不依赖其他 TASK 的文件），同时通过 parent_task / child_task 字段可以重建完整的任务链。
+
+新任务的 brief.md 示例：
 ```yaml
 ---
 created: 2026-05-11T16:00:00+08:00
-author: debt-auditor
+author: master-orchestrator
 task_id: TASK-003
 session_id: S-20260511-01
-type: summary
+type: brief
+target_group: DEBT
 parent_task: TASK-001                    ← 由 DEFECT 组 TASK-001 触发
 handoff_signal: TECH_DEBT_FOUND
 ---
+```
+
+源任务 summary.md 应补充的字段：
+```yaml
+child_task: TASK-003                     ← 跨组交接产生的新任务
+handoff_signal: TECH_DEBT_FOUND
 ```
 
 ---
