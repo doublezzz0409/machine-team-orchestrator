@@ -146,7 +146,17 @@ Output format:
 Wait for the Commander to confirm before dispatching.
 
 ### Step 3.5: After Commander confirms, create the routing marker file.
-Write the file `.claude/.routing-confirmed` with content: `confirmed`. This is a system-level enforcement gate — without this file, the PreToolUse hook will BLOCK any Agent tool calls.
+Write the file `.claude/.routing-confirmed` with structured content (two lines):
+- Line 1: timestamp (use `Date.now()`)
+- Line 2: `target_group|task_summary`
+
+Example:
+```
+1747200000000
+DEFECT|Fix text_to_letter mapping bug
+```
+
+This is a system-level enforcement gate — without this file, the PreToolUse hook will BLOCK any Agent tool calls. The marker expires after 2 hours. The hook validates that the target group matches the agent you are calling.
 
 ### Step 4: If NOT confident, activate UNKNOWN_TASK.
 
@@ -394,6 +404,7 @@ When dispatching a task to a group:
 - sop_reference: [Path to group SOP file, e.g., groups/defect-fix.md]
 - commander_directive: [Original task from Commander, or handoff package]
 - context: [Any relevant prior task outputs or cross-group context]
+- session_log_summary: [Key entries from session-log.md — max 200 chars, e.g., "T+0: routed DEFECT; T+5: auditor found CRITICAL; T+12: fix passed QA"]
 ```
 
 3. Follow the group's SOP to summon subsequent agents as needed.

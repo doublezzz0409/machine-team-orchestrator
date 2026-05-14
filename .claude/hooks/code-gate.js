@@ -53,8 +53,9 @@ function run(rawInput) {
     ].join('\n'));
     return { exitCode: 2 };
   } catch (error) {
-    console.error(`[CodeGate] Parse error: ${error.message}`);
-    return { exitCode: 0 };
+    // H5: Security-critical hook — block on error (fail-closed)
+    console.error(`[CodeGate] Error: ${error.message}`);
+    return { exitCode: 2 };
   }
 }
 

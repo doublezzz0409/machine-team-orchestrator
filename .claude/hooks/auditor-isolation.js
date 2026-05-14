@@ -39,7 +39,9 @@ function run(rawInput) {
       return { exitCode: 2 };
     }
   } catch (error) {
-    console.error(`[AuditorIsolation] Parse error: ${error.message}`);
+    // H5: Security-critical hook — block on error (fail-closed)
+    console.error(`[AuditorIsolation] Error: ${error.message}`);
+    return { exitCode: 2 };
   }
   return { exitCode: 0 };
 }

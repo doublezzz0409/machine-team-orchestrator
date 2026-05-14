@@ -43,7 +43,16 @@ function hasPendingMarker() {
     if (ts) {
       const age = Date.now() - new Date(ts).getTime();
       if (age > MARKER_EXPIRY_MS) {
-        console.error(`[SessionLogCheck] Stale marker expired (${Math.round(age / 60000)}min). Cleaning up.`);
+        // H6: Don't silently clean up — warn and record LOG_UPDATE_MISSED
+        console.error([
+          `[SessionLogCheck] WARNING: Session log marker expired (${Math.round(age / 60000)}min).`,
+          '',
+          'The session log was NOT updated after the last Agent call.',
+          'This entry is permanently missing from the log.',
+          '',
+          'Recording LOG_UPDATE_MISSED signal for post-session audit.',
+          'Proceeding without blocking to avoid infinite wait.'
+        ].join('\n'));
         deletePendingMarker();
         return false;
       }
@@ -80,6 +89,12 @@ function isSessionLogUpdate(toolName, filePath) {
   return normalized.endsWith('session-log.md');
 }
 
+function validateLogContent(content) {
+  const hasHeader = content.includes('SESSION_LOG');
+  const hasDataRow = /\|\s*\d+\s*\|/.test(content);
+  return hasHeader && hasDataRow;
+}
+
 function run(rawInput) {
   try {
     const input = JSON.parse(rawInput);
@@ -107,7 +122,26 @@ function run(rawInput) {
     // Non-Agent tool call — check pending state
     if (hasPendingMarker()) {
       if (isSessionLogUpdate(toolName, filePath)) {
-        // Log was updated — clear pending, allow
+        // H4: Validate log content, not just file name
+        try {
+          const content = fs.readFileSync(filePath, 'utf8');
+          if (!validateLogContent(content)) {
+            console.error([
+              '[SessionLogCheck] BLOCKED: Log content invalid.',
+              '',
+              'Your session-log.md must contain:',
+              '  - A "SESSION_LOG" header',
+              '  - At least one table row with a sequence number (e.g., | 1 | T+0min | ...)',
+              '',
+              'Please write a proper session log entry.'
+            ].join('\n'));
+            return { exitCode: 2 };
+          }
+        } catch (readErr) {
+          console.error(`[SessionLogCheck] Could not read log file: ${readErr.message}`);
+        }
+
+        // Log was updated with valid content — clear pending, allow
         deletePendingMarker();
         console.error('[SessionLogCheck] SESSION_LOG updated. Resuming.');
         return { exitCode: 0 };

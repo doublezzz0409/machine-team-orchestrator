@@ -33,6 +33,12 @@ function cleanupMarker() {
       fs.unlinkSync(markerPath);
       console.error(`[RoutingCleanup] Marker deleted: ${markerPath}`);
     }
+    // Also clean up H8 retry counter
+    const retriesPath = path.join(getProjectRoot(), '.claude', '.routing-gate-retries');
+    if (fs.existsSync(retriesPath)) {
+      fs.unlinkSync(retriesPath);
+      console.error(`[RoutingCleanup] Retries counter deleted: ${retriesPath}`);
+    }
   } catch (error) {
     console.error(`[RoutingCleanup] Cleanup error: ${error.message}`);
   }
